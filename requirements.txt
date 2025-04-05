@@ -1,0 +1,43 @@
+# Web scraping
+playwright>=1.41.0
+html5lib>=1.1
+requests>=2.23.0
+
+# Search engine
+duckduckgo-search>=7.2.1
+
+# LLM integration
+openai>=1.59.8 # o1 support
+anthropic>=0.42.0
+python-dotenv>=1.0.0
+
+# Testing
+unittest2>=1.1.0
+pytest>=8.0.0
+pytest-asyncio>=0.23.5
+
+# Google Generative AI
+google-generativeai
+
+# gRPC, for Google Generative AI preventing WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+grpcio==1.70.0
+
+# Project-specific dependencies
+matplotlib>=3.8.0
+numpy>=1.24.0
+pandas>=2.0.0
+seaborn>=0.12.0
+scipy>=1.10.0
+statsmodels>=0.14.0
+
+# Data Acquisition dependencies
+GEOparse>=2.0.0
+requests>=2.31.0
+
+# DESeq2 Analysis (R packages, install via BiocManager in R)
+# DESeq2
+# dplyr
+# readr
+# argparse
+# ggplot2
+# pheatmap

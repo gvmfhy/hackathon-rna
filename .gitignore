@@ -1,0 +1,91 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# R
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+.Renviron
+.Rprofile
+.Rapp.history
+
+# Virtual environments
+venv/
+env/
+ENV/
+.env
+
+# Large data files (exclude large raw data but keep processed data)
+# Uncomment if needed for your specific project
+# /data/raw/*.csv
+# /data/raw/*.tsv
+# /data/raw/*.txt
+
+# Exception for specific result files we want to version control
+!results/*.csv
+!results/plots/*.png
+!results/plots/*.jpg
+!data/processed/example_*.csv
+
+# Intermediate/temporary results
+*.tmp
+tmp/
+.~lock.*
+
+# Large files
+*.gz
+*.zip
+*.tar
+*.7z
+*.rar
+
+# Logs
+logs/
+*.log
+
+# OS specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE specific
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# Personal scripts and credentials
+secrets.yaml
+credentials.json 
