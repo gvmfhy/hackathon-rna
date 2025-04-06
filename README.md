@@ -1,12 +1,18 @@
-# miRNA Target Optimization Platform
+# AI-Powered miRNA Drug Discovery Platform
 
-A computational platform for designing mRNA therapeutics with enhanced tissue specificity through microRNA-based targeting.
+A comprehensive computational platform for identifying, prioritizing, and evaluating miRNA-based therapeutics, demonstrated for Hepatocellular Carcinoma (HCC).
 
 ## Project Overview
 
-This platform addresses a critical challenge in drug design: targeted delivery. By leveraging microRNA expression patterns that differentiate between diseased and healthy tissues, we can create mRNA therapeutics that function selectively where needed while sparing healthy cells.
+This platform addresses the critical challenge of targeted drug delivery and efficient drug discovery in the rapidly growing field of RNA therapeutics. By leveraging disease-specific microRNA (miRNA) expression patterns and employing advanced AI and computational biology techniques, we identify and optimize potential miRNA drug candidates.
 
-The platform focuses on NASH-HCC (Non-Alcoholic Steatohepatitis-driven Hepatocellular Carcinoma) as a proof-of-concept. With approximately 25% of the world's population suffering from Non-Alcoholic Fatty Liver Disease, this represents an urgent medical need and significant commercial opportunity.
+Our system integrates multi-omics data (genomics, transcriptomics, protein interactions) to:
+1.  Identify dysregulated miRNAs in disease states (initially focused on NASH-HCC vs. Normal Liver).
+2.  Predict and prioritize miRNA target genes based on network centrality and biological relevance.
+3.  Assess the druggability of identified targets using resources like Open Targets.
+4.  Analyze miRNA binding site accessibility using RNA structure prediction (ViennaRNA).
+5.  Perform *in silico* safety checks for potential off-target effects.
+6.  Generate comprehensive reports and interactive visualizations to guide therapeutic design.
 
 ## Hackathon Focus
 
@@ -26,98 +32,116 @@ Optimizes the placement of miRNA binding sites (particularly miR-122 for liver t
 
 ## Key Features
 
-- **Differential miRNA Analysis**: Identify disease-specific miRNA signatures
-- **Structure-based Site Optimization**: Leverage ViennaRNA for RNA structure prediction
-- **Visualization Tools**: Interpret complex RNA interactions visually
+-   **End-to-End Workflow:** Integrated pipeline from data acquisition to prioritized candidate list.
+-   **Multi-Omics Integration:** Leverages TCGA, miRTarBase, STRING DB, Open Targets, and miRBase.
+-   **Differential Expression Analysis:** Robust statistical analysis (Wilcoxon, t-test) with FDR correction.
+-   **Network-Based Prioritization:** Identifies high-impact hub genes using graph theory (NetworkX).
+-   **Druggability Assessment:** Filters targets based on known druggability characteristics.
+-   **Structural Accessibility Prediction:** Optimizes binding site design using RNA secondary structure (`RNAfold`).
+-   **Off-Target Safety Analysis:** Assesses potential binding to unintended sequences.
+-   **Advanced Visualization:** Includes volcano plots, heatmaps (Seaborn, Plotly), UMAP, and interactive network graphs (PyVis).
+-   **Pathway Enrichment:** Identifies biological pathways associated with target genes (g:Profiler).
 
 ## Project Structure
 
 ```
 hackathonbro/
-├── src/                 # Source code
-│   ├── data/            # Data handling modules
-│   │   ├── fetch_xena_data.py     # TCGA data acquisition
-│   │   ├── fetch_geo_data.py      # GEO data acquisition
-│   │   ├── deseq2_analysis.R      # R-based DESeq2 analysis
-│   │   └── run_nash_hcc_analysis.py # End-to-end workflow
-│   ├── models/          # Core computational models
-│   ├── utils/           # Utility functions
-│   └── visualization/   # Visualization modules
-├── data/                # Data directory
-│   ├── raw/             # Raw data
-│   └── processed/       # Processed data
-├── results/             # Analysis results
-│   └── plots/           # Visualization plots
-├── tools/               # Helper scripts and tools
-├── requirements.txt     # Project dependencies
-└── README.md            # This file
+├── data/                     # Data directory
+│   ├── annotations/          # Annotation files (miRBase, mappings)
+│   ├── mirnet/               # miRNA target databases (miRTarBase, etc.)
+│   ├── open_targets/         # Open Targets data (Parquet files)
+│   ├── string_db/            # STRING protein interaction data
+│   ├── tcga/                 # TCGA data (expression, clinical)
+│   └── utr_sequences/        # Reference UTR sequences (e.g., HBB)
+├── results/                  # Analysis results (CSVs, plots, reports)
+│   ├── accessibility_analysis/ # Accessibility prediction outputs
+│   └── networks/             # Network visualizations (HTML, GraphML)
+├── scripts/                  # Main analysis and workflow scripts
+│   ├── advanced_visualizations.py
+│   ├── convert_mimat_to_mirna.py
+│   ├── mirna_differential_expression.py
+│   ├── off_target_check.py
+│   ├── pathway_enrichment.py
+│   └── target_prioritization_analysis.py
+├── src/                      # Source code for core modules
+│   ├── data/                 # Data fetching/processing modules (e.g., fetch_xena_data_api.py)
+│   ├── models/               # Core computational models (e.g., rna_structure.py)
+│   ├── utils/                # Utility functions (e.g., mirna_utils.py)
+│   └── visualization/        # Visualization modules (e.g., structure_viz.py)
+├── run_mirna_switch_workflow.py # Main orchestrator script for the platform
+├── requirements.txt          # Project dependencies
+└── README.md                 # This file
 ```
+*(Note: Structure based on recent commit; some subdirectories might vary based on exact data organization)*
 
 ## Setup
 
-1. Ensure you have Python 3.8+ installed
-2. Install ViennaRNA package (required for RNA structure prediction):
-   ```bash
-   # macOS (using Homebrew)
-   brew tap brewsci/bio
-   brew install brewsci/bio/viennarna
-   
-   # Ubuntu/Debian
-   sudo apt-get install viennarna
-   ```
+1.  **Prerequisites:**
+    *   Python 3.8+
+    *   ViennaRNA package (See [ViennaRNA Installation](https://www.tbi.univie.ac.at/RNA/documentation.html#install))
+    *   R environment (Optional, if using R-based analysis components like DESeq2)
 
-3. Install required Python packages:
-   ```bash
-   # Create and activate virtual environment
-   python3 -m venv venv
-   source venv/bin/activate
-   
-   # Install dependencies
-   pip install -r requirements.txt
-   ```
+2.  **Python Environment & Dependencies:**
+    ```bash
+    # Create and activate virtual environment (recommended)
+    python3 -m venv venv
+    source venv/bin/activate
 
-4. Install R dependencies (optional, for DESeq2 analysis):
-   ```R
-   if (!require("BiocManager", quietly = TRUE))
-       install.packages("BiocManager")
-   
-   BiocManager::install(c("DESeq2", "dplyr", "readr", "argparse", "ggplot2", "pheatmap"))
-   ```
+    # Install Python packages
+    pip install --upgrade pip
+    pip install -r requirements.txt
+    ```
+    *Key Dependencies include:* `pandas`, `numpy`, `scipy`, `statsmodels`, `matplotlib`, `seaborn`, `plotly`, `networkx`, `pyvis`, `requests`, `biopython`, `umap-learn`, `gprofiler-official`, `pyarrow`, `xenaPython`.
+
+3.  **R Dependencies (Optional):**
+    ```R
+    # Run in R console
+    if (!require("BiocManager", quietly = TRUE)) install.packages("BiocManager")
+    BiocManager::install(c("DESeq2", "dplyr", "readr", "argparse", "ggplot2", "pheatmap"))
+    ```
+
+4.  **Data:**
+    *   Download necessary data files (e.g., from STRING, miRBase, Open Targets) and place them in the corresponding `data/` subdirectories.
+    *   Alternatively, use provided scripts (like `fetch_xena_data_api.py`) to acquire data where possible.
 
 ## Usage
 
-### Target Prioritizer
+The primary way to run the full analysis pipeline is using the main workflow script:
 
-Standard analysis:
 ```bash
-python src/target_prioritizer.py --input path/to/data.csv --output results/
+python run_mirna_switch_workflow.py
 ```
 
-New end-to-end workflow:
+Individual analysis steps can also be run using the scripts in the `scripts/` directory, typically requiring specific input files generated by previous steps. Check the individual script arguments (`--help`) for details.
+
+Example (Differential Expression):
 ```bash
-python src/data/run_nash_hcc_analysis.py --source xena --analysis python
+# Ensure data/tcga/TCGA_LIHC_miRNA_processed.csv exists first
+python scripts/mirna_differential_expression.py
 ```
 
-### Accessibility Predictor
+Example (Target Prioritization - requires DE results and target data):
 ```bash
-python src/accessibility_predictor.py --utr sample_utr.fa --mirna miR-122
+# Ensure results/mirna_de_significant_with_names.csv and data/mirnet/ files exist
+python scripts/target_prioritization_analysis.py
 ```
 
 ## Scientific Background
 
-MicroRNAs (miRNAs) are small non-coding RNAs that regulate gene expression through binding to messenger RNAs (mRNAs). Their expression patterns differ between diseased and healthy tissues, offering a natural mechanism for targeted therapeutics.
-
-Key aspects:
-- miRNA targeting relies on seed region (nucleotides 2-8) complementarity
-- Secondary structure and accessibility significantly impact binding efficiency
-- Canonical seed matches include: 8mer, 7mer-m8, and 7mer-A1 sites
+MicroRNAs (miRNAs) are small non-coding RNAs crucial for post-transcriptional gene regulation. They bind primarily to the 3' UTR of target mRNAs, often leading to mRNA degradation or translational repression. Differential expression of miRNAs between healthy and diseased states provides opportunities for developing highly specific therapeutics. Effective miRNA targeting depends on factors like seed sequence complementarity, binding site accessibility (influenced by local RNA secondary structure), and target abundance.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Acknowledgments
 
-- TCGA (The Cancer Genome Atlas) for providing data
-- UCSC Xena Browser for data access
-- Gene Expression Omnibus (GEO) for additional datasets
+This platform utilizes data and tools from several sources, including:
+- The Cancer Genome Atlas (TCGA)
+- UCSC Xena Browser
+- miRBase
+- miRTarBase
+- STRING Database
+- Open Targets
+- ViennaRNA Package
+- g:Profiler
