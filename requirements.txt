@@ -34,6 +34,11 @@ statsmodels>=0.14.0
 GEOparse>=2.0.0
 requests>=2.31.0
 
+# Network and Visualization dependencies
+networkx>=3.0
+pyvis>=0.3.0
+pyarrow>=9.0.0
+
 # DESeq2 Analysis (R packages, install via BiocManager in R)
 # DESeq2
 # dplyr

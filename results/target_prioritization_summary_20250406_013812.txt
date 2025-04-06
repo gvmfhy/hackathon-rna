@@ -1,0 +1,46 @@
+# miRNA Target Gene Prioritization Analysis
+
+## Analysis Overview
+- Date: 2025-04-06 01:38:47
+- Total significant miRNAs: 9
+- Upregulated miRNAs: 2
+- Downregulated miRNAs: 7
+- Target genes of upregulated miRNAs: 155
+- Target genes of downregulated miRNAs: 3249
+
+## Network Analysis
+- Upregulated miRNA targets network: 155 nodes, 144 edges
+- Downregulated miRNA targets network: 3249 nodes, 7401 edges
+
+## Hub Genes and Druggability
+### Targets of Upregulated miRNAs (likely suppressed in HCC)
+- Hub genes identified: 16
+- Druggable hub genes: 0
+
+### Targets of Downregulated miRNAs (likely overexpressed in HCC)
+- Hub genes identified: 325
+- Druggable hub genes: 0
+
+## Interpretation
+- Target genes of upregulated miRNAs are likely suppressed in HCC compared to normal tissue, suggesting potential tumor suppressor roles. Druggable hubs among these genes could be candidates for therapeutic enhancement or activation.
+- Target genes of downregulated miRNAs are likely overexpressed in HCC compared to normal tissue, suggesting potential oncogenic roles. Druggable hubs among these genes are prime candidates for targeted inhibition.
+
+## Output Files
+- Interactive visualization of upregulated miRNA targets: upregulated_mirna_targets_20250406_013812.html
+- Interactive visualization of downregulated miRNA targets: downregulated_mirna_targets_20250406_013812.html
+- Upregulated miRNA targets analysis results: upregulated_mirna_targets_analysis_20250406_013812.csv
+- Downregulated miRNA targets analysis results: downregulated_mirna_targets_analysis_20250406_013812.csv
+
+## Advanced Visualization
+For publication-quality visualizations with advanced edge bundling and layouts, the networks have been exported in GraphML format. These files can be imported into specialized network visualization tools:
+- Cytoscape (https://cytoscape.org/): For interactive exploration and analysis
+- Gephi (https://gephi.org/): For high-quality static visualizations
+
+## Note on Interactive Visualizations
+The HTML visualizations provide a dynamic way to explore the networks:
+- Node size represents centrality (larger = more central)
+- Node colors represent: Orange-red (druggable hubs), Pink (non-druggable hubs), Green (druggable non-hubs), Blue (other genes)
+- Edge thickness represents confidence of protein-protein interaction
+- Hover over nodes and edges for detailed information
+- Drag nodes to explore the network structure
+- Use mouse wheel to zoom in/out

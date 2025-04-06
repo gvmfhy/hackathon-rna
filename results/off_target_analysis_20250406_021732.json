@@ -1,0 +1,16 @@
+{
+  "utr_sequence": "AUGGUGCAUCUGACUCCUGAGGAGAAGUCUGCCGUUACUGCCCUGUGGGGCAAGGUGAACGUGGAUGAAGUUGGUGGUGAGGCCCUGGGCAGGCUGCUGGUGGUGUACCCUUGGACCCAGAGGUUCUUUGAGUCCUUUGGGAUCUGUCCACUCCUGAUGCUGUUAUGGGCAACCCUAAGGUGAAGGCUCAUGGCAAGAAAG",
+  "utr_length": 201,
+  "structure_energy": -67.0,
+  "high_risk_mirnas": [
+    "hsa-miR-122-5p",
+    "hsa-miR-192-5p"
+  ],
+  "potential_off_target_sites": [],
+  "summary": {
+    "total_potential_sites": 0,
+    "high_risk_sites": 0,
+    "medium_risk_sites": 0,
+    "low_risk_sites": 0
+  }
+}

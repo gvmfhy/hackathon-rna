@@ -1,0 +1,37 @@
+# miRNA Target Pathway Enrichment Analysis
+
+## Analysis Overview
+- Date: 2025-04-06 00:55:50
+- Total significant miRNAs: 9
+- Upregulated miRNAs: 2
+- Downregulated miRNAs: 7
+- Target genes of upregulated miRNAs: 155
+- Target genes of downregulated miRNAs: 3249
+
+## Interpretation
+- Target genes of upregulated miRNAs: These genes are likely suppressed in HCC compared to normal tissue
+- Target genes of downregulated miRNAs: These genes are likely more expressed in HCC compared to normal tissue
+
+## Top Pathways for Targets of Upregulated miRNAs (likely suppressed in HCC)
+1. GO:BP: regulation of developmental process (p = 5.85e-08, genes: 43)
+2. GO:BP: regulation of metabolic process (p = 6.61e-08, genes: 84)
+3. GO:BP: regulation of multicellular organismal process (p = 2.48e-07, genes: 48)
+4. GO:BP: regulation of biosynthetic process (p = 2.72e-07, genes: 72)
+5. GO:BP: hemopoiesis (p = 6.36e-07, genes: 24)
+6. GO:BP: regulation of multicellular organismal development (p = 1.09e-06, genes: 30)
+7. GO:BP: regulation of biological process (p = 1.24e-06, genes: 115)
+8. GO:BP: regulation of macromolecule biosynthetic process (p = 1.87e-06, genes: 69)
+9. GO:BP: positive regulation of transcription by RNA polymerase II (p = 1.89e-06, genes: 29)
+10. GO:BP: positive regulation of cellular process (p = 1.89e-06, genes: 74)
+
+## Top Pathways for Targets of Downregulated miRNAs (likely overexpressed in HCC)
+1. GO:BP: developmental process (p = 1.33e-12, genes: 925)
+2. GO:BP: signaling (p = 8.26e-12, genes: 1013)
+3. GO:BP: cell communication (p = 9.45e-12, genes: 1015)
+4. GO:BP: anatomical structure development (p = 1.06e-11, genes: 850)
+5. GO:BP: multicellular organismal process (p = 1.32e-11, genes: 1029)
+6. GO:BP: cell surface receptor signaling pathway (p = 2.12e-11, genes: 492)
+7. GO:BP: cell differentiation (p = 4.72e-10, genes: 612)
+8. GO:BP: cellular developmental process (p = 4.72e-10, genes: 612)
+9. GO:BP: anatomical structure morphogenesis (p = 5.30e-10, genes: 409)
+10. GO:BP: multicellular organism development (p = 1.33e-09, genes: 646)
