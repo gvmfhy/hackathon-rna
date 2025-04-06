@@ -1,125 +1,123 @@
 import pandas as pd
 import os
-import requests
-import time
-import json
+import argparse
+import requests # Re-add requests for API fallback
+import time     # For potential delays in API calls
 
-# Get the current directory and set paths
-current_dir = os.path.dirname(os.path.abspath(__file__))
-base_dir = os.path.dirname(current_dir)
-results_dir = os.path.join(base_dir, 'results')
-
-# Find the latest significant results file
-def find_latest_file(directory, pattern):
-    files = [f for f in os.listdir(directory) if f.startswith(pattern)]
-    if not files:
-        return None
-    return max(files, key=lambda x: os.path.getmtime(os.path.join(directory, x)))
-
-sig_file = find_latest_file(results_dir, 'mirna_de_significant_')
-results_file = find_latest_file(results_dir, 'mirna_de_results_')
-
-if not sig_file:
-    print("No significant results file found.")
-    exit(1)
-
-print(f"Processing file: {sig_file}")
-sig_path = os.path.join(results_dir, sig_file)
-df = pd.read_csv(sig_path)
-
-# Manual mapping for our top differentially expressed miRNAs
-# Based on miRBase and literature searches
-mimat_to_mirna = {
-    'MIMAT0004552': 'hsa-miR-421',
-    'MIMAT0000436': 'hsa-miR-133a-3p',
-    'MIMAT0001545': 'hsa-miR-483-5p',
-    'MIMAT0002808': 'hsa-miR-511-5p',
-    'MIMAT0000765': 'hsa-miR-335-5p',
-    'MIMAT0006790': 'hsa-miR-1257',
-    'MIMAT0003879': 'hsa-miR-551b-3p',
-    'MIMAT0000281': 'hsa-miR-223-3p',
-    'MIMAT0005797': 'hsa-miR-1261'
-}
-
-# Function to query miRBase REST API
-def get_mirna_name(mimat_id):
-    if mimat_id in mimat_to_mirna:
-        return mimat_to_mirna[mimat_id]
-
+# --- Function to query miRBase REST API (Fallback) ---
+def get_mirna_name_from_api(mimat_id):
+    """Queries miRBase API to get miRNA name for a MIMAT ID."""
+    print(f"  Attempting API lookup for {mimat_id}...")
     try:
         # Use miRBase REST API
         url = f"https://mirbase.org/api/v1/accession/{mimat_id}"
+        # Add a small delay to avoid overwhelming the API
+        time.sleep(0.2)
         
-        response = requests.get(url)
-        if response.status_code == 200:
-            data = response.json()
-            if 'id' in data:
-                return data['id']
+        response = requests.get(url, timeout=10) # Added timeout
+        response.raise_for_status() # Raise HTTPError for bad responses (4xx or 5xx)
         
-        return f"Unknown ({mimat_id})"
+        data = response.json()
+        if data and 'id' in data:
+            print(f"    API Success: Found name '{data['id']}'")
+            return data['id']
+        else:
+            print(f"    API Warning: No 'id' field in response for {mimat_id}")
+            return None # Indicate failure to find name via API
+            
+    except requests.exceptions.RequestException as e:
+        print(f"    API Error looking up {mimat_id}: {e}")
+        return None # Indicate failure
     except Exception as e:
-        print(f"Error looking up {mimat_id}: {e}")
-        return f"Error ({mimat_id})"
+        print(f"    Unexpected Error during API lookup for {mimat_id}: {e}")
+        return None # Indicate failure
 
-print(f"Converting {len(df)} MIMAT IDs to miRNA names...")
+def main():
+    parser = argparse.ArgumentParser(description="Convert MIMAT IDs to miRNA names in a results file.")
+    parser.add_argument("--input", required=True, help="Path to the input CSV file.")
+    parser.add_argument("--output", required=True, help="Path for the output CSV file with names.")
+    parser.add_argument("--map", required=True, help="Path to the MIMAT ID to miRNA name mapping CSV file.")
+    parser.add_argument("--col", required=True, help="Name of the column containing MIMAT IDs in the input file.")
+    args = parser.parse_args()
 
-# For each row in the dataframe, add the miRNA name
-df['miRNA_name'] = df['miRNA'].apply(get_mirna_name)
+    # --- Load Input File ---
+    print(f"Loading input file: {args.input}")
+    try:
+        df = pd.read_csv(args.input)
+    except FileNotFoundError:
+        print(f"Error: Input file not found at {args.input}")
+        exit(1)
+    except Exception as e:
+        print(f"Error reading input file {args.input}: {e}")
+        exit(1)
 
-# Reorder columns to put miRNA name after MIMAT ID
-cols = df.columns.tolist()
-cols.insert(1, cols.pop(cols.index('miRNA_name')))
-df = df[cols]
+    # Check if specified column exists
+    if args.col not in df.columns:
+        print(f"Error: Column '{args.col}' not found in the input file.")
+        exit(1)
 
-# Save the enriched results
-output_file = os.path.join(results_dir, 'mirna_de_significant_with_names.csv')
-df.to_csv(output_file, index=False)
-print(f"Results with miRNA names saved to: {output_file}")
+    # --- Load Mapping File ---
+    print(f"Loading mapping file: {args.map}")
+    mimat_to_name_map = {}
+    try:
+        map_df = pd.read_csv(args.map)
+        # Ensure required columns exist in map file
+        if 'MIMAT_ID' not in map_df.columns or 'miRNA_name' not in map_df.columns:
+            print(f"Error: Mapping file must contain 'MIMAT_ID' and 'miRNA_name' columns.")
+            exit(1)
+        # Create dictionary, handle potential NaN in miRNA_name
+        mimat_to_name_map = pd.Series(map_df.miRNA_name.values, index=map_df.MIMAT_ID).dropna().to_dict()
+        print(f"Loaded {len(mimat_to_name_map)} mappings from file.")
+    except FileNotFoundError:
+        print(f"Warning: Mapping file not found at {args.map}. Will rely heavily on API lookup.")
+    except Exception as e:
+        print(f"Warning: Error reading mapping file {args.map}: {e}. Will rely heavily on API lookup.")
+    
+    if not mimat_to_name_map:
+        print("Warning: No mappings loaded from the map file.")
 
-# Create a mapping file for future reference
-mapping_df = pd.DataFrame({
-    'MIMAT_ID': list(mimat_to_mirna.keys()),
-    'miRNA_name': list(mimat_to_mirna.values())
-})
-mapping_file = os.path.join(base_dir, 'data', 'mimat_to_mirna_mapping.csv')
-mapping_df.to_csv(mapping_file, index=False)
-print(f"MIMAT to miRNA name mapping saved to: {mapping_file}")
+    # --- Define Conversion Function with Fallback ---
+    def get_name_with_fallback(mimat_id):
+        # 1. Check local map first
+        name = mimat_to_name_map.get(mimat_id)
+        if name and name != mimat_id: # Ensure it's not just the ID itself if map fails
+            return name
+        
+        # 2. If not in local map, try API
+        api_name = get_mirna_name_from_api(mimat_id)
+        if api_name:
+            # Optionally update the map in memory for this run? (No, avoid side effects)
+            return api_name
+            
+        # 3. If API fails or no name found, return original ID
+        print(f"  Fallback: Using original ID '{mimat_id}' as name.")
+        return mimat_id # Fallback to original ID
 
-# If we also have the full results file, create an enriched version of that too
-if results_file:
-    print(f"Also processing full results file: {results_file}")
-    results_path = os.path.join(results_dir, results_file)
-    full_df = pd.read_csv(results_path)
+    # --- Add miRNA Name Column ---
+    print(f"Adding 'miRNA_name' column based on '{args.col}' with API fallback...")
+    df['miRNA_name'] = df[args.col].apply(get_name_with_fallback)
     
-    # Add miRNA names to all results (only for the top 50 by p-value to keep it manageable)
-    top_50 = full_df.sort_values('pvalue').head(50)
-    
-    for mimat_id in top_50['miRNA'].unique():
-        if mimat_id not in mimat_to_mirna:
-            mirna_name = get_mirna_name(mimat_id)
-            mimat_to_mirna[mimat_id] = mirna_name
-    
-    # Update the mapping file
-    mapping_df = pd.DataFrame({
-        'MIMAT_ID': list(mimat_to_mirna.keys()),
-        'miRNA_name': list(mimat_to_mirna.values())
-    })
-    mapping_df.to_csv(mapping_file, index=False)
-    
-    # Add miRNA names to the full results where we have them
-    full_df['miRNA_name'] = full_df['miRNA'].map(mimat_to_mirna).fillna("Not mapped")
-    
-    # Create a smaller version with just the top 50 miRNAs by p-value
-    top_50_df = full_df.sort_values('pvalue').head(50).copy()
-    
-    # Reorder columns
-    cols = top_50_df.columns.tolist()
-    cols.insert(1, cols.pop(cols.index('miRNA_name')))
-    top_50_df = top_50_df[cols]
-    
-    # Save the top 50 results
-    output_file = os.path.join(results_dir, 'mirna_de_top50_with_names.csv')
-    top_50_df.to_csv(output_file, index=False)
-    print(f"Top 50 results with miRNA names saved to: {output_file}")
+    # Reorder columns to put miRNA_name after the original ID column
+    try:
+        cols = df.columns.tolist()
+        # Find the index of the original column
+        id_col_index = cols.index(args.col)
+        # Insert the new column right after it
+        cols.insert(id_col_index + 1, cols.pop(cols.index('miRNA_name')))
+        df = df[cols]
+    except ValueError:
+        # If column index logic fails for some reason, just proceed without reordering
+        print(f"Warning: Could not reorder columns. 'miRNA_name' will be appended at the end.")
 
-print("Conversion complete!") 
+    # --- Save Output File ---
+    print(f"Saving results with miRNA names to: {args.output}")
+    try:
+        df.to_csv(args.output, index=False)
+    except Exception as e:
+        print(f"Error writing output file {args.output}: {e}")
+        exit(1)
+
+    print("Conversion complete!")
+
+if __name__ == "__main__":
+    main() 

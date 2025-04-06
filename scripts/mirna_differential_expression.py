@@ -6,6 +6,7 @@ from scipy import stats
 from statsmodels.stats.multitest import multipletests
 import os
 from datetime import datetime
+from scipy.stats import zscore
 
 # Set the aesthetics for the plots
 # 'seaborn-whitegrid' is deprecated in newer versions
@@ -17,7 +18,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 base_dir = os.path.dirname(current_dir)
 
 # Define file paths with absolute paths
-input_file = os.path.join(base_dir, 'data/TCGA_LIHC_miRNA_processed.csv')
+input_file = os.path.join(base_dir, 'data', 'tcga', 'TCGA_LIHC_miRNA_processed.csv')
 output_dir = os.path.join(base_dir, 'results')
 
 # Create output directory if it doesn't exist
@@ -207,49 +208,90 @@ volcano_file = os.path.join(output_dir, f'volcano_plot_{timestamp}.png')
 plt.savefig(volcano_file, dpi=300)
 print(f"Volcano plot saved to: {volcano_file}")
 
-# Generate a simple heatmap without clustering
+# --- Load miRNA Name Mapping (Moved Before Heatmap) ---
+print("Loading miRNA name mapping...")
+mapping_file = os.path.join(base_dir, 'data', 'annotations', 'mimat_to_mirna_mapping.csv') # Using updated path
+mimat_to_name_map = {}
+try:
+    map_df = pd.read_csv(mapping_file)
+    # Create dictionary, handle potential NaN in miRNA_name
+    mimat_to_name_map = pd.Series(map_df.miRNA_name.values, index=map_df.MIMAT_ID).dropna().to_dict()
+    print(f"Loaded {len(mimat_to_name_map)} mappings.")
+except FileNotFoundError:
+    print(f"Warning: Mapping file not found at {mapping_file}. Heatmap will use MIMAT IDs.")
+except Exception as e:
+    print(f"Warning: Error loading or processing mapping file {mapping_file}: {e}. Heatmap will use MIMAT IDs.")
+
+# --- Generate Simple Heatmap (Reverted) --- 
 print("Generating heatmap of top differentially expressed miRNAs...")
 # Select top 20 miRNAs by p-value for the heatmap
-top_20_mirnas = significant.head(20)['miRNA'].tolist()
+top_20_mirnas_ids = significant.head(20)['miRNA'].tolist()
 
-if top_20_mirnas:
-    # Get a subset of samples (all normal and a random sample of tumor)
-    all_normal = df[df['Group'] == 'Normal']
-    sampled_tumor = df[df['Group'] == 'NASH-HCC'].sample(min(50, len(tumor_samples)))
-    plot_samples = pd.concat([all_normal, sampled_tumor])
+if top_20_mirnas_ids:
+    # Get corresponding names, fallback to ID if name not found
+    top_20_mirnas_names = [mimat_to_name_map.get(mid, mid) for mid in top_20_mirnas_ids]
+
+    # --- Prepare Data for Heatmap ---
+    # Use all Normal samples and a subset of Tumor samples for balance
+    num_tumor_samples = min(100, len(tumor_samples)) # Limit tumor samples if > 100
+    sampled_tumor = tumor_samples.sample(num_tumor_samples, random_state=42) if len(tumor_samples) > num_tumor_samples else tumor_samples
     
-    # Create a new figure
-    plt.figure(figsize=(14, 10))
+    # Combine normal and sampled tumor
+    plot_samples_df = pd.concat([normal_samples, sampled_tumor])
+
+    # Extract expression data using MIMAT IDs
+    heatmap_data = plot_samples_df[top_20_mirnas_ids].copy()
+
+    # Handle potential NaN values (fill with mean of the miRNA across samples)
+    if heatmap_data.isnull().values.any():
+        print("Warning: NaN values found in heatmap data. Filling with column means.")
+        heatmap_data = heatmap_data.fillna(heatmap_data.mean())
+
+    # --- Z-score Scaling --- 
+    # Standardize expression values (Z-score) across samples for each miRNA
+    # This makes patterns more comparable
+    heatmap_data_z = heatmap_data.apply(zscore, axis=0)
     
-    # Extract just the expression data for plotting
-    expr_data = plot_samples[top_20_mirnas].values
-    
-    # Z-score normalize the data for better visualization
-    expr_data_z = np.zeros_like(expr_data, dtype=float)
-    for j in range(expr_data.shape[1]):
-        col_data = expr_data[:, j]
-        expr_data_z[:, j] = (col_data - np.nanmean(col_data)) / np.nanstd(col_data)
-    
-    # Create the heatmap
-    im = plt.imshow(expr_data_z, aspect='auto', cmap='coolwarm', interpolation='nearest')
-    plt.colorbar(im, label='Z-score')
-    
-    # Add miRNA names to columns
-    plt.xticks(np.arange(len(top_20_mirnas)), top_20_mirnas, rotation=45, ha='right')
-    
-    # Add a dividing line between normal and tumor samples
-    plt.axhline(y=len(all_normal)-0.5, color='black', linestyle='-')
-    
-    # Add labels
-    plt.title('Top 20 miRNAs by p-value (HCC vs Normal)', fontsize=14)
-    plt.xlabel('miRNAs')
-    plt.ylabel('Samples (Normal above line, HCC below)')
-    
-    plt.tight_layout()
-    
-    # Save the figure
-    heatmap_file = os.path.join(output_dir, f'heatmap_top_mirnas_{timestamp}.png')
-    plt.savefig(heatmap_file, dpi=300)
-    print(f"Heatmap saved to: {heatmap_file}")
+    # Assign miRNA names to columns
+    heatmap_data_z.columns = top_20_mirnas_names
+
+    # --- Generate the Heatmap --- 
+    print(f"Generating heatmap for {heatmap_data_z.shape[1]} miRNAs and {heatmap_data_z.shape[0]} samples...")
+    try:
+        plt.figure(figsize=(12, 10))
+        
+        # Use seaborn heatmap
+        ax = sns.heatmap(
+            heatmap_data_z, 
+            cmap="coolwarm",     # Color map (blue=low, red=high)
+            center=0,            # Center color map at zero Z-score
+            cbar_kws={'label': 'Z-score'}, # Color bar label
+            yticklabels=False    # Hide individual sample labels
+        )
+        
+        # Add horizontal line to separate Normal and HCC samples
+        num_normal = len(normal_samples)
+        ax.axhline(y=num_normal, color='black', lw=2)
+        
+        # Rotate miRNA labels
+        plt.xticks(rotation=45, ha='right')
+        
+        # Add titles and labels
+        plt.title('Top 20 miRNAs by p-value (HCC vs Normal)', fontsize=14)
+        plt.xlabel('miRNAs', fontsize=12)
+        plt.ylabel(f'Samples (Normal above line, HCC below)', fontsize=12)
+        plt.tight_layout()
+        
+        # Save the figure
+        heatmap_file = os.path.join(output_dir, f'heatmap_top_mirnas_{timestamp}.png')
+        plt.savefig(heatmap_file, dpi=300, bbox_inches='tight')
+        print(f"Simple heatmap saved to: {heatmap_file}")
+        plt.close() # Close the figure
+
+    except Exception as e:
+        print(f"Error generating simple heatmap: {e}")
+
+else:
+    print("No significant miRNAs found to generate heatmap.")
 
 print("\nAnalysis complete!") 

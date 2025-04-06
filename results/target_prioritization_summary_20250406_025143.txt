@@ -1,7 +1,7 @@
 # miRNA Target Gene Prioritization Analysis
 
 ## Analysis Overview
-- Date: 2025-04-06 01:38:47
+- Date: 2025-04-06 02:52:33
 - Total significant miRNAs: 9
 - Upregulated miRNAs: 2
 - Downregulated miRNAs: 7
@@ -15,21 +15,45 @@
 ## Hub Genes and Druggability
 ### Targets of Upregulated miRNAs (likely suppressed in HCC)
 - Hub genes identified: 16
-- Druggable hub genes: 0
+- Druggable hub genes: 15
+
+Top druggable hub genes (by centrality score):
+1. TP53 (centrality: 0.081, druggable by: Other Modality)
+2. STAT3 (centrality: 0.077, druggable by: Other Modality)
+3. IL6 (centrality: 0.055, druggable by: Other Modality)
+4. RELA (centrality: 0.053, druggable by: Other Modality)
+5. MDM2 (centrality: 0.046, druggable by: Other Modality)
+6. CAV1 (centrality: 0.045, druggable by: Other Modality)
+7. FOXO3 (centrality: 0.039, druggable by: Other Modality)
+8. FOXO1 (centrality: 0.035, druggable by: Other Modality)
+9. CARM1 (centrality: 0.034, druggable by: Other Modality)
+10. ATM (centrality: 0.033, druggable by: Other Modality)
 
 ### Targets of Downregulated miRNAs (likely overexpressed in HCC)
 - Hub genes identified: 325
-- Druggable hub genes: 0
+- Druggable hub genes: 312
+
+Top druggable hub genes (by centrality score):
+1. EGFR (centrality: 0.038, druggable by: Other Modality)
+2. HSP90AA1 (centrality: 0.030, druggable by: Other Modality)
+3. MYC (centrality: 0.021, druggable by: Other Modality)
+4. MAPK3 (centrality: 0.019, druggable by: Other Modality)
+5. PIK3CA (centrality: 0.018, druggable by: Other Modality)
+6. CDC42 (centrality: 0.017, druggable by: Other Modality)
+7. RHOA (centrality: 0.017, druggable by: Other Modality)
+8. MAPK1 (centrality: 0.017, druggable by: Other Modality)
+9. CDH1 (centrality: 0.016, druggable by: Other Modality)
+10. IL6 (centrality: 0.013, druggable by: Other Modality)
 
 ## Interpretation
 - Target genes of upregulated miRNAs are likely suppressed in HCC compared to normal tissue, suggesting potential tumor suppressor roles. Druggable hubs among these genes could be candidates for therapeutic enhancement or activation.
 - Target genes of downregulated miRNAs are likely overexpressed in HCC compared to normal tissue, suggesting potential oncogenic roles. Druggable hubs among these genes are prime candidates for targeted inhibition.
 
 ## Output Files
-- Interactive visualization of upregulated miRNA targets: upregulated_mirna_targets_20250406_013812.html
-- Interactive visualization of downregulated miRNA targets: downregulated_mirna_targets_20250406_013812.html
-- Upregulated miRNA targets analysis results: upregulated_mirna_targets_analysis_20250406_013812.csv
-- Downregulated miRNA targets analysis results: downregulated_mirna_targets_analysis_20250406_013812.csv
+- Interactive visualization of upregulated miRNA targets: upregulated_mirna_targets_20250406_025143.html
+- Interactive visualization of downregulated miRNA targets: downregulated_mirna_targets_20250406_025143.html
+- Upregulated miRNA targets analysis results: upregulated_mirna_targets_analysis_20250406_025143.csv
+- Downregulated miRNA targets analysis results: downregulated_mirna_targets_analysis_20250406_025143.csv
 
 ## Advanced Visualization
 For publication-quality visualizations with advanced edge bundling and layouts, the networks have been exported in GraphML format. These files can be imported into specialized network visualization tools:

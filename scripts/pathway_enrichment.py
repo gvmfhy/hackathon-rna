@@ -12,7 +12,7 @@ data_dir = os.path.join(base_dir, 'data')
 
 # Set file paths
 mirna_significant_file = os.path.join(results_dir, 'mirna_de_significant_with_names.csv')
-mirtarbase_file = os.path.join(data_dir, 'miRNet-mir-gene-hsa-mirtarbase.csv')
+mirtarbase_file = os.path.join(data_dir, 'mirnet', 'miRNet-mir-gene-hsa-mirtarbase.csv')
 
 # Create timestamp for output filenames
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

@@ -1,6 +1,6 @@
 # Off-Target Binding Site Analysis
 
-Date: 2025-04-06 02:17:32
+Date: 2025-04-06 02:57:36
 UTR sequence length: 201 nt
 miRNAs analyzed: hsa-miR-122-5p, hsa-miR-192-5p
 
