@@ -4,7 +4,7 @@ A comprehensive computational platform for identifying, prioritizing, and evalua
 
 ## Project Overview
 
-This platform addresses the critical challenge of targeted drug delivery and efficient drug discovery in the rapidly growing field of RNA therapeutics. By leveraging disease-specific microRNA (miRNA) expression patterns and employing advanced AI and computational biology techniques, we identify and optimize potential miRNA drug candidates.
+This platform addresses the critical challenge of targeted drug delivery and efficient drug discovery within RNA therapeutics. By leveraging disease-specific microRNA (miRNA) expression patterns, AI, and computational biology techniques, we identify and optimize potential miRNA drug candidates.
 
 Our system integrates multi-omics data (genomics, transcriptomics, protein interactions) to:
 1.  Identify dysregulated miRNAs in disease states (initially focused on NASH-HCC vs. Normal Liver).
